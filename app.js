@@ -3,28 +3,23 @@ const mongoose = require('mongoose');
 const { errors } = require('celebrate');
 const routesUser = require('./routes/users');
 const routerCard = require('./routes/cards');
+const { NotFoundErr } = require('./errors');
+const auth = require('./middlewares/auth');
 
 const { PORT = 3000 } = process.env;
 
 const app = express();
 
 app.use(express.json());
-/*
-app.use((req, res, next) => {
-  req.user = {
-    _id: '62019c8a5c57068990615d0c',
-  };
-
-  next();
-});
-*/
 
 app.use(routesUser);
 
 app.use(routerCard);
 
-app.use((req, res) => {
-  res.status(404).send({ message: 'Не корректный URL' });
+app.use(auth);
+
+app.use((req, res, next) => {
+  next(new NotFoundErr('Не корректный URL'));
 });
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {

@@ -1,5 +1,5 @@
 const Card = require('../models/card');
-const { NotFoundErr, BadRequestErr } = require('../errors');
+const { NotFoundErr, BadRequestErr, ForbiddenErr } = require('../errors');
 
 const getCards = (req, res, next) => {
   Card.find({})
@@ -28,17 +28,16 @@ const createCard = (req, res, next) => {
 
 const deleteCard = (req, res, next) => {
   const { id } = req.params;
-  Card.findByIdAndRemove(id)
+  Card.findById(id)
+    .orFail(() => new NotFoundErr('Карточка по переданному id не найдена'))
     .then((card) => {
-      if (card) {
-        res.send({ data: card });
-      } else {
-        throw new NotFoundErr('Карточка по переданному id не найден');
+      if (!card.owner.equals(req.user._id)) {
+        return next(new ForbiddenErr('Нельзя удалить чужую карточку'));
       }
+      return card.remove()
+        .them(() => res.send({ message: 'Карточка удалена' }));
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch(next);
 };
 
 const likeCard = (req, res, next) => {
@@ -86,70 +85,3 @@ module.exports = {
   likeCard,
   dislikeCard,
 };
-
-/*
-const deleteCard = (req, res, next) => {
-  const { id } = req.params;
-  Card.findByIdAndRemove(id)
-    .then((card) => {
-      if (card) {
-        res.send({ data: card });
-      } else {
-        throw new NotFoundErr('Карточка по переданному id не найден');
-      }
-    })
-    .catch((err) => {
-      next(err);
-    });
-};
-
-const likeCard = (req, res) => {
-  const { id } = req.params;
-  Card.findByIdAndUpdate(
-    id,
-    { $addToSet: { likes: id } }, // добавить _id в массив, если его там нет
-    { new: true },
-  )
-    .then((card) => {
-      if (!card) {
-        res
-          .status(404)
-          .send({ message: 'Карточка по переданному id не найдена' });
-      } else {
-        res.send({ data: card });
-      }
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Невалидный id карточки' });
-      } else {
-        res.status(500).send({ message: 'Произошла ошибочка' });
-      }
-    });
-};
-
-const dislikeCard = (req, res) => {
-  const { id } = req.params;
-  Card.findByIdAndUpdate(
-    id,
-    { $pull: { likes: id } }, // добавить _id в массив, если его там нет
-    { new: true },
-  )
-    .then((card) => {
-      if (!card) {
-        res
-          .status(404)
-          .send({ message: 'Карточка по переданному id не найдена' });
-      } else {
-        res.send({ data: card });
-      }
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Невалидный id карточки' });
-      } else {
-        res.status(500).send({ message: 'Произошла ошибочка' });
-      }
-    });
-};
-*/

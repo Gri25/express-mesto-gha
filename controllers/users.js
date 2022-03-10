@@ -20,8 +20,8 @@ const getUsers = (req, res, next) => {
 };
 
 const getUserMe = (req, res, next) => {
-  const { email } = req.body;
-  User.findOne({ email }).select('+password')
+  // const { email } = req.body;
+  User.findById(req.user._id).select('+password')
     .then((user) => {
       if (user) {
         res.send({ data: user });
@@ -112,7 +112,6 @@ const createUser = (req, res, next) => {
 
   bcrypt.hash(password, SOLT_ROUND)
     .then((hash) => {
-      // записываем данные в базу
       User.create({
         name,
         about,
@@ -120,21 +119,20 @@ const createUser = (req, res, next) => {
         email,
         password: hash,
       })
-      // возвращаем записанные в базу данные пользователю
-        .then((user) => res.send({ data: user }))
-      // возможно юзер нужно будет переписать с нижней буквы
-      // если данные не записались, вернём ошибку
+        .catch(next)
+        .then(() => res.status(200).send({
+          data: {
+            name, about, avatar, email,
+          },
+        }))
         .catch((err) => {
           if (err.code === MONGO_DUPLICATE_ERROR_CODE) {
             next(new ConflictErr('Такой пользователь уже существует'));
-          //  res.status(409).send({ message: 'Такой пользователь уже существует' });
           }
           if (err.name === 'ValidationError') {
             next(new BadRequestErr(`${Object.values(err.errors).map((error) => error.message).join(', ')}`));
-          //  res.status(400).send({ message: 'Переданы не корректные данные' });
           } else {
             next(err);
-          //  res.status(500).send({ message: 'Произошла ошибочка' });
           }
         });
     });
@@ -165,82 +163,3 @@ module.exports = {
   login,
   getUserMe,
 };
-
-/*
-const createUser = (req, res) => {
-  const {
-    name,
-    about,
-    avatar,
-    email,
-    password,
-  } = req.body;
-
-  bcrypt.hash(password, SOLT_ROUND)
-    .then((hash) => {
-      // записываем данные в базу
-      User.create({
-        name,
-        about,
-        avatar,
-        email,
-        password: hash,
-      })
-      // возвращаем записанные в базу данные пользователю
-        .then((user) => res.send({ data: user }))
-      // возможно юзер нужно будет переписать с нижней буквы
-      // если данные не записались, вернём ошибку
-        .catch((err) => {
-          if (err.code === MONGO_DUPLICATE_ERROR_CODE) {
-            res.status(409).send({ message: 'Такой пользователь уже существует' });
-          }
-          if (err.name === 'ValidationError') {
-            res.status(400).send({ message: 'Переданы не корректные данные' });
-          } else {
-            res.status(500).send({ message: 'Произошла ошибочка' });
-          }
-        });
-    });
-};
-
-const sendUser = (req, res, next) => {
-  const { id } = req.params;
-  User.findById(id)
-    .then((user) => {
-      if (!user) {
-        //  res
-        //  .status(404)
-        //  .send({ message: 'Пользователь по переданному id не найден' });
-        throw new NotFoundErr('Пользователь по переданному id не найден');
-      } else {
-        res.send({ data: user });
-      }
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(400).send({ message: 'Невалидный id пользователя' });
-      } else {
-        res.status(500).send({ message: 'Произошла ошибочка' });
-      }
-
-};
-
-const login = (req, res) => {
-  const { email, password } = req.body;
-  return User.findUserByCredentials(email, password)
-    .then((user) => {
-      // аутентификация успешна! пользователь в переменной user
-      // создадим токен
-      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
-      // не совсем понял как записывать в куки
-      // вернём токен
-      res.send({ token });
-    })
-    .catch((err) => {
-      // ошибка аутентификации
-      res
-        .status(401)
-        .send({ message: err.message });
-    });
-};
-*/

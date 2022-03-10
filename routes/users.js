@@ -9,22 +9,24 @@ const {
   getUserMe,
 } = require('../controllers/users');
 
-const validateRegisterUser = require('../middlewares/validationUser');
+const validationPatchProfile = require('../middlewares/validationPatchProfile');
+const validationPatchAvatar = require('../middlewares/validationPatchAvatar');
+const validationId = require('../middlewares/validationId');
 
 const auth = require('../middlewares/auth');
 
 router.get('/users', auth, getUsers);
 
-router.patch('/users/me', auth, validateRegisterUser, updateProfile);
+router.patch('/users/me', auth, validationPatchProfile, updateProfile);
 
-router.patch('/users/me/avatar', auth, validateRegisterUser, updateAvatar);
+router.patch('/users/me/avatar', auth, validationPatchAvatar, updateAvatar);
 
-router.get('/users/me', auth, validateRegisterUser, getUserMe);
+router.get('/users/me', auth, getUserMe);
 
-router.get('/users/:id', auth, validateRegisterUser, sendUser);
+router.get('/users/:id', auth, validationId, sendUser);
 
-router.post('/signup', validateRegisterUser, createUser);
+router.post('/signup', validationPatchProfile, createUser);
 
-router.post('/signin', validateRegisterUser, login);
+router.post('/signin', validationPatchProfile, login);
 
 module.exports = router;

@@ -36,15 +36,13 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-  // select: false, у меня не работает регистрация и авторизация если я прописываю эту настройку
-  // если вам не сложно поясните пожалуйста почему я не могу сделать это
-  // и вообще как правильно сделать
+    select: false,
   },
 });
 
 userSchema.statics.findUserByCredentials = function (email, password) {
   // попытаемся найти пользователя по почте
-  return this.findOne({ email }) // this — это модель User
+  return this.findOne({ email }).select('+password') // this — это модель User
     .then((user) => {
       // не нашёлся — отклоняем промис
       if (!user) {
