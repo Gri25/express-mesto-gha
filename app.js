@@ -6,8 +6,6 @@ const routerCard = require('./routes/cards');
 
 const { PORT = 3000 } = process.env;
 
-// const auth = require('./middlewares/auth');
-
 const app = express();
 
 app.use(express.json());
@@ -20,7 +18,6 @@ app.use((req, res, next) => {
   next();
 });
 */
-// app.use(auth);
 
 app.use(routesUser);
 
