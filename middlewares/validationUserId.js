@@ -1,7 +1,7 @@
 const { celebrate, Joi } = require('celebrate');
 
 const validationUserId = celebrate({
-  body: {
+  params: {
     id: Joi.string().length(24).hex().required(),
   },
 });

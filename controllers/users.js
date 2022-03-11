@@ -80,7 +80,7 @@ const updateProfile = (req, res, next) => {
 const updateAvatar = (req, res, next) => {
   // обновим имя найденного по _id пользователя
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user._id, avatar, {
+  User.findByIdAndUpdate(req.user._id, { avatar }, {
     new: true, // обработчик then получит на вход обновлённую запись
     runValidators: true, // данные будут валидированы перед изменением
     upsert: false, // если пользователь не найден, он будет создан
