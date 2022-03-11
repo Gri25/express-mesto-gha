@@ -21,7 +21,7 @@ const getUsers = (req, res, next) => {
 
 const getUserMe = (req, res, next) => {
   // const { email } = req.body;
-  User.findById(req.user._id).select('+password')
+  User.findById(req.user._id)
     .then((user) => {
       if (user) {
         res.send({ data: user });
@@ -119,7 +119,6 @@ const createUser = (req, res, next) => {
         email,
         password: hash,
       })
-        .catch(next)
         .then(() => res.status(200).send({
           data: {
             name, about, avatar, email,
@@ -135,7 +134,8 @@ const createUser = (req, res, next) => {
             next(err);
           }
         });
-    });
+    })
+    .catch(next);
 };
 
 const login = (req, res, next) => {

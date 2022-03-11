@@ -11,7 +11,9 @@ const {
 
 const validationPatchProfile = require('../middlewares/validationPatchProfile');
 const validationPatchAvatar = require('../middlewares/validationPatchAvatar');
-const validationId = require('../middlewares/validationId');
+const validationRegister = require('../middlewares/validationRegister');
+const validationLogin = require('../middlewares/validationLogin');
+const validationUserId = require('../middlewares/validationUserId');
 
 const auth = require('../middlewares/auth');
 
@@ -23,10 +25,10 @@ router.patch('/users/me/avatar', auth, validationPatchAvatar, updateAvatar);
 
 router.get('/users/me', auth, getUserMe);
 
-router.get('/users/:id', auth, validationId, sendUser);
+router.get('/users/:id', auth, validationUserId, sendUser);
 
-router.post('/signup', validationPatchProfile, createUser);
+router.post('/signup', validationRegister, createUser);
 
-router.post('/signin', validationPatchProfile, login);
+router.post('/signin', validationLogin, login);
 
 module.exports = router;
