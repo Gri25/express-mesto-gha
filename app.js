@@ -6,6 +6,7 @@ const routerCard = require('./routes/cards');
 const { NotFoundErr } = require('./errors');
 const auth = require('./middlewares/auth');
 const { requestLogger, errorLogger } = require('./middlewares/Logger');
+require('dotenv').config();
 
 const { PORT = 3000 } = process.env;
 

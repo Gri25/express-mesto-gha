@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { NODE_ENV, JWT_SECRET } = require('dotenv');
 const {
   NotFoundErr,
   BadRequestErr,
@@ -144,7 +145,7 @@ const login = (req, res, next) => {
     .then((user) => {
       // аутентификация успешна! пользователь в переменной user
       // создадим токен
-      const token = jwt.sign({ _id: user._id }, 'some-secret-key', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret', { expiresIn: '7d' });
       // не совсем понял как записывать в куки
       // вернём токен
       res.send({ token });
